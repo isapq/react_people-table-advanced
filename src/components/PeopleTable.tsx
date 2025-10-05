@@ -29,11 +29,21 @@ export const PeopleTable = ({ peopleData }: PeopleTableProps) => {
               <span className="is-flex is-flex-wrap-nowrap">
                 {colun.name}
                 {colun.name !== 'Mother' && colun.name !== 'Father' && (
-                  <Link to={`#/people?sort=${colun.name.toLocaleLowerCase()}`}>
+                  <Link
+                    to={`#/people?sort=${colun.name.toLowerCase()}&order=${
+                      sortColumn === colun.name.toLowerCase() && sortOrder === 'asc'
+                        ? 'desc'
+                        : 'asc'
+                    }`}
+                  >
                     <span className="icon">
                       <i
                         className={`fas ${
-                          colun.name === 'Born' ? 'fa-sort-up' : 'fa-sort'
+                          colun.name.toLowerCase() === sortColumn
+                            ? sortOrder === 'desc'
+                              ? 'fa-sort-down'
+                              : 'fa-sort-up'
+                            : 'fa-sort'
                         }`}
                       />
                     </span>
@@ -49,7 +59,10 @@ export const PeopleTable = ({ peopleData }: PeopleTableProps) => {
         {peopleData.map(person => {
           const mother = peopleData.find(p => p.name === person.motherName);
           const father = peopleData.find(p => p.name === person.fatherName);
-          const isActive = location.hash.endsWith(person.slug);
+
+          const searchParams = new URLSearchParams(location.search);
+          const activeSlugFromSearch = searchParams.get('active');
+          const isActive = location.hash.endsWith(person.slug) || person.slug === activeSlugFromSearch;
 
           return (
             <tr
@@ -59,7 +72,10 @@ export const PeopleTable = ({ peopleData }: PeopleTableProps) => {
             >
               <td>
                 <NavLink
-                  to={`/people/${person.slug}`}
+                  to={{
+                    pathname: `/people/${person.slug}`,
+                    search: getSearchWith({}, searchParams).toString(),
+                  }}
                   className={person.sex === 'f' ? 'has-text-danger' : ''}
                 >
                   {person.name}
@@ -74,7 +90,10 @@ export const PeopleTable = ({ peopleData }: PeopleTableProps) => {
                 {person.motherName ? (
                   mother ? (
                     <NavLink
-                      to={`/people/${mother.slug}`}
+                      to={{
+                        pathname: `/people/${mother.slug}`,
+                        search: getSearchWith({}, new URLSearchParams(location.search)).toString(),
+                      }}
                       className={mother.sex === 'f' ? 'has-text-danger' : ''}
                     >
                       {mother.name}
@@ -90,7 +109,12 @@ export const PeopleTable = ({ peopleData }: PeopleTableProps) => {
               <td>
                 {person.fatherName ? (
                   father ? (
-                    <NavLink to={`/people/${father.slug}`}>
+                    <NavLink
+                      to={{
+                        pathname: `/people/${father.slug}`,
+                        search: getSearchWith({}, new URLSearchParams(location.search)).toString(),
+                      }}
+                    >
                       {father.name}
                     </NavLink>
                   ) : (

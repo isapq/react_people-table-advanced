@@ -13,21 +13,21 @@ export const PeopleFilters = () => {
   const query = searchParams.get('query') || '';
   const old = searchParams.getAll('old');
 
-  function setSearchWith(params: SearchParamsUpdate) {
-    const search = getSearchWith(params, searchParams);
+  function getSearchWith(params: SearchParamsUpdate) {
+    const search = getSearchWith(searchParams, params);
 
     setSearchParams(search);
   }
 
   function handleQueryChange(event: React.ChangeEvent<HTMLInputElement>) {
-    setSearchWith({ query: event.target.value });
+    getSearchWith({ query: event.target.value });
   }
 
   /* eslint-disable @typescript-eslint/indent */
   function clearNumbers(ch: string) {
     const newOld = old.includes(ch) ? old.filter(o => o !== ch) : [...old, ch];
 
-    setSearchWith({ old: newOld });
+    getSearchWith({ old: newOld });
   }
 
   return (
@@ -37,7 +37,7 @@ export const PeopleFilters = () => {
       <p className="panel-tabs" data-cy="SexFilter">
         <a
           className={!searchParams.get('sex') ? 'is-active' : ''}
-          onClick={() => setSearchWith({ sex: 'm' })}
+          onClick={() => getSearchWith({ sex: 'm' })}
         >
           All
         </a>
