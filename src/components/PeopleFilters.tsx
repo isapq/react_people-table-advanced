@@ -1,16 +1,56 @@
+import React from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { getSearchWith } from '../utils/searchHelper';
+
+type SearchParamsUpdate = {
+  query?: string;
+  sex?: string;
+  old?: string;
+};
+
 export const PeopleFilters = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const query = searchParams.get('query') || '';
+  const old = searchParams.getAll('old');
+
+  function setSearchWith(params: SearchParamsUpdate) {
+    const search = getSearchWith(params, searchParams);
+
+    setSearchParams(search);
+  }
+
+  function handleQueryChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setSearchWith({ query: event.target.value });
+  }
+
+  /* eslint-disable @typescript-eslint/indent */
+  function clearNumbers(ch: string) {
+    const newOld = old.includes(ch) ? old.filter(o => o !== ch) : [...old, ch];
+
+    setSearchWith({ old: newOld });
+  }
+
   return (
     <nav className="panel">
       <p className="panel-heading">Filters</p>
 
       <p className="panel-tabs" data-cy="SexFilter">
-        <a className="is-active" href="#/people">
+        <a
+          className={!searchParams.get('sex') ? 'is-active' : ''}
+          onClick={() => setSearchWith({ sex: 'm' })}
+        >
           All
         </a>
-        <a className="" href="#/people?sex=m">
+        <a
+          className={searchParams.get('sex') === 'm' ? 'is-active' : ''}
+          onClick={() => setSearchWith({ sex: 'm' })}
+        >
           Male
         </a>
-        <a className="" href="#/people?sex=f">
+        <a
+          className={searchParams.get('sex') === 'f' ? 'is-active' : ''}
+          onClick={() => setSearchWith({ sex: 'f' })}
+        >
           Female
         </a>
       </p>
@@ -22,6 +62,8 @@ export const PeopleFilters = () => {
             type="search"
             className="input"
             placeholder="Search"
+            value={query}
+            onChange={handleQueryChange}
           />
 
           <span className="icon is-left">
@@ -36,7 +78,7 @@ export const PeopleFilters = () => {
             <a
               data-cy="century"
               className="button mr-1"
-              href="#/people?centuries=16"
+              onClick={() => clearNumbers('16')}
             >
               16
             </a>
@@ -44,7 +86,7 @@ export const PeopleFilters = () => {
             <a
               data-cy="century"
               className="button mr-1 is-info"
-              href="#/people?centuries=17"
+              onClick={() => clearNumbers('17')}
             >
               17
             </a>
@@ -52,7 +94,7 @@ export const PeopleFilters = () => {
             <a
               data-cy="century"
               className="button mr-1 is-info"
-              href="#/people?centuries=18"
+              onClick={() => clearNumbers('18')}
             >
               18
             </a>
@@ -60,7 +102,7 @@ export const PeopleFilters = () => {
             <a
               data-cy="century"
               className="button mr-1 is-info"
-              href="#/people?centuries=19"
+              onClick={() => clearNumbers('19')}
             >
               19
             </a>
@@ -68,7 +110,7 @@ export const PeopleFilters = () => {
             <a
               data-cy="century"
               className="button mr-1"
-              href="#/people?centuries=20"
+              onClick={() => clearNumbers('20')}
             >
               20
             </a>
@@ -87,9 +129,12 @@ export const PeopleFilters = () => {
       </div>
 
       <div className="panel-block">
-        <a className="button is-link is-outlined is-fullwidth" href="#/people">
+        <button
+          className="button is-link is-outlined is-fullwidth"
+          onClick={() => setSearchParams({})}
+        >
           Reset all filters
-        </a>
+        </button>
       </div>
     </nav>
   );
