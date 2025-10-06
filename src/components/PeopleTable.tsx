@@ -1,5 +1,5 @@
 import { Person } from '../types';
-import { NavLink, useLocation, Link } from 'react-router-dom';
+import { NavLink, useLocation, useSearchParams, Link } from 'react-router-dom';
 
 const colunsNames = [
   { name: 'Name' },
@@ -16,6 +16,29 @@ type PeopleTableProps = {
 
 export const PeopleTable = ({ peopleData }: PeopleTableProps) => {
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+
+  const sortColumn = searchParams.get('sort');
+  const sortOrder = searchParams.get('order');
+
+  const sortedPeople = [...peopleData].sort((a, b) => {
+    if (!sortColumn || sortOrder === 'none') {
+      return 0;
+    }
+
+    const valueA = a[sortColumn as keyof Person];
+    const valueB = b[sortColumn as keyof Person];
+
+    if (valueA === undefined || valueB === undefined) {
+      return 0;
+    }
+
+    if (sortOrder === 'asc') {
+      return valueA > valueB ? 1 : -1;
+    } else {
+      return valueA < valueB ? 1 : -1;
+    }
+  });
 
   return (
     <table
@@ -30,9 +53,13 @@ export const PeopleTable = ({ peopleData }: PeopleTableProps) => {
                 {colun.name}
                 {colun.name !== 'Mother' && colun.name !== 'Father' && (
                   <Link
-                    to={`#/people?sort=${colun.name.toLowerCase()}&order=${
-                      sortColumn === colun.name.toLowerCase() && sortOrder === 'asc'
-                        ? 'desc'
+                    to={`?sort=${colun.name.toLowerCase()}&order=${
+                      sortColumn === colun.name.toLowerCase()
+                        ? sortOrder === 'asc'
+                          ? 'desc'
+                          : sortOrder === 'desc'
+                          ? 'none'
+                          : 'asc'
                         : 'asc'
                     }`}
                   >
@@ -56,13 +83,15 @@ export const PeopleTable = ({ peopleData }: PeopleTableProps) => {
       </thead>
 
       <tbody>
-        {peopleData.map(person => {
+        {sortedPeople.map(person => {
           const mother = peopleData.find(p => p.name === person.motherName);
           const father = peopleData.find(p => p.name === person.fatherName);
 
           const searchParams = new URLSearchParams(location.search);
           const activeSlugFromSearch = searchParams.get('active');
-          const isActive = location.hash.endsWith(person.slug) || person.slug === activeSlugFromSearch;
+          const isActive =
+            location.hash.endsWith(person.slug) ||
+            person.slug === activeSlugFromSearch;
 
           return (
             <tr
@@ -74,7 +103,9 @@ export const PeopleTable = ({ peopleData }: PeopleTableProps) => {
                 <NavLink
                   to={{
                     pathname: `/people/${person.slug}`,
-                    search: getSearchWith({}, searchParams).toString(),
+                    search: getSearchWith(
+                      new URLSearchParams(location.search), {}
+                    ),
                   }}
                   className={person.sex === 'f' ? 'has-text-danger' : ''}
                 >
@@ -92,7 +123,9 @@ export const PeopleTable = ({ peopleData }: PeopleTableProps) => {
                     <NavLink
                       to={{
                         pathname: `/people/${mother.slug}`,
-                        search: getSearchWith({}, new URLSearchParams(location.search)).toString(),
+                        search: getSearchWith(
+                          new URLSearchParams(location.search), {}
+                        ),
                       }}
                       className={mother.sex === 'f' ? 'has-text-danger' : ''}
                     >
@@ -112,7 +145,9 @@ export const PeopleTable = ({ peopleData }: PeopleTableProps) => {
                     <NavLink
                       to={{
                         pathname: `/people/${father.slug}`,
-                        search: getSearchWith({}, new URLSearchParams(location.search)).toString(),
+                        search: getSearchWith(
+                          new URLSearchParams(location.search), {}
+                        ),
                       }}
                     >
                       {father.name}

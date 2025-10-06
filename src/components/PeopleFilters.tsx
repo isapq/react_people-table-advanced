@@ -13,14 +13,10 @@ export const PeopleFilters = () => {
   const query = searchParams.get('query') || '';
   const old = searchParams.getAll('old');
 
-  function getSearchWith(params: SearchParamsUpdate) {
-    const search = getSearchWith(searchParams, params);
+  function setSearchWith(params: SearchParamsUpdate) {
+    const search = getSearchWith(searchParams, params); // usa o import
 
     setSearchParams(search);
-  }
-
-  function handleQueryChange(event: React.ChangeEvent<HTMLInputElement>) {
-    getSearchWith({ query: event.target.value });
   }
 
   /* eslint-disable @typescript-eslint/indent */
@@ -37,7 +33,7 @@ export const PeopleFilters = () => {
       <p className="panel-tabs" data-cy="SexFilter">
         <a
           className={!searchParams.get('sex') ? 'is-active' : ''}
-          onClick={() => getSearchWith({ sex: 'm' })}
+          onClick={() => setSearchWith({ sex: 'm' })}
         >
           All
         </a>
@@ -63,7 +59,7 @@ export const PeopleFilters = () => {
             className="input"
             placeholder="Search"
             value={query}
-            onChange={handleQueryChange}
+            onChange={e => setSearchWith({ query: e.target.value })}
           />
 
           <span className="icon is-left">
